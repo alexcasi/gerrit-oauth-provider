@@ -56,6 +56,9 @@ class CasOAuthService implements OAuthServiceProvider {
 
   private final String rootUrl;
   private final boolean fixLegacyUserId;
+  private final String clientId;
+  private final String clientSecret;
+  private final CasApi api;
   private final OAuthService service;
 
   @Inject
@@ -65,13 +68,16 @@ class CasOAuthService implements OAuthServiceProvider {
     PluginConfig cfg = cfgFactory.getFromGerritConfig(
         pluginName + CONFIG_SUFFIX);
     rootUrl = cfg.getString(InitOAuth.ROOT_URL);
+    clientId = cfg.getString(InitOAuth.CLIENT_ID);
+    clientSecret = cfg.getString(InitOAuth.CLIENT_SECRET);
+    api = new CasApi(rootUrl);
     String canonicalWebUrl = CharMatcher.is('/').trimTrailingFrom(
         urlProvider.get()) + "/";
     fixLegacyUserId = cfg.getBoolean(InitOAuth.FIX_LEGACY_USER_ID, false);
     service = new ServiceBuilder()
-        .provider(new CasApi(rootUrl))
-        .apiKey(cfg.getString(InitOAuth.CLIENT_ID))
-        .apiSecret(cfg.getString(InitOAuth.CLIENT_SECRET))
+        .provider(api)
+        .apiKey(clientId)
+        .apiSecret(clientSecret)
         .callback(canonicalWebUrl + "oauth")
         .build();
   }
@@ -143,14 +149,6 @@ class CasOAuthService implements OAuthServiceProvider {
         fixLegacyUserId ? id.getAsString() : null);
   }
 
-  private String getStringElement(JsonObject o, String name) {
-    JsonElement elem = o.get(name);
-    if (elem == null || elem.isJsonNull())
-      return null;
-
-    return elem.getAsString();
-  }
-
   @Override
   public OAuthToken getAccessToken(OAuthVerifier rv) {
     Verifier vi = new Verifier(rv.getValue());
@@ -172,5 +170,22 @@ class CasOAuthService implements OAuthServiceProvider {
   @Override
   public String getName() {
     return "Generic CAS OAuth2";
+  }
+
+  // package-private, needed by CasOAuthLoginProvider
+  String getClientId() {
+    return clientId;
+  }
+
+  CasApi getApi() {
+    return api;
+  }
+
+  private String getStringElement(JsonObject o, String name) {
+    JsonElement elem = o.get(name);
+    if (elem == null || elem.isJsonNull())
+      return null;
+
+    return elem.getAsString();
   }
 }
