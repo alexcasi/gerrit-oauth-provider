@@ -84,5 +84,13 @@ class HttpModule extends HttpPluginModule {
           .annotatedWith(Exports.named(GitLabOAuthService.CONFIG_SUFFIX))
           .to(GitLabOAuthService.class);
     }
+
+    cfg = cfgFactory.getFromGerritConfig(
+        pluginName + OlympiaOAuthService.CONFIG_SUFFIX);
+    if (cfg.getString(InitOAuth.CLIENT_ID) != null) {
+      bind(OAuthServiceProvider.class)
+          .annotatedWith(Exports.named(OlympiaOAuthService.CONFIG_SUFFIX))
+          .to(OlympiaOAuthService.class);
+    }
   }
 }

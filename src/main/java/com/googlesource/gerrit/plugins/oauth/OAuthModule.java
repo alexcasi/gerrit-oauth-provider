@@ -28,5 +28,12 @@ class OAuthModule extends AbstractModule {
           .annotatedWith(Exports.named(CasOAuthService.CONFIG_SUFFIX))
           .to(CasOAuthLoginProvider.class);
     }
+    cfg = cfgFactory.getFromGerritConfig(
+        pluginName + OlympiaOAuthService.CONFIG_SUFFIX);
+    if (cfg.getString(InitOAuth.CLIENT_ID) != null) {
+      bind(OAuthLoginProvider.class)
+          .annotatedWith(Exports.named(OlympiaOAuthService.CONFIG_SUFFIX))
+          .to(OlympiaOAuthLoginProvider.class);
+    }
   }
 }
