@@ -33,7 +33,7 @@ class OAuthModule extends AbstractModule {
     if (cfg.getString(InitOAuth.CLIENT_ID) != null) {
       bind(OAuthLoginProvider.class)
           .annotatedWith(Exports.named(OlympiaOAuthService.CONFIG_SUFFIX))
-          .to(OlympiaOAuthLoginProvider.class);
+          .to(OlympiaOAuthService.class);
     }
   }
 }
